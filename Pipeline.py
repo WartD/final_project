@@ -5,9 +5,7 @@ import warnings
 import datetime
 import pandas as pd
 
-from imblearn import FunctionSampler
 from category_encoders import TargetEncoder
-from imblearn.under_sampling import TomekLinks
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import FunctionTransformer
@@ -19,7 +17,7 @@ from sklearn.neural_network import MLPClassifier
 from catboost import CatBoostClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier, StackingClassifier
-
+from imblearn.under_sampling import RandomUnderSampler
 
 
 
@@ -57,12 +55,7 @@ def drop_useless_columns(data):
     return data.drop(columns_to_drop, axis=1)
 
 
-def feature_sample(data, target):
-    data = data.copy()
-    target = target.copy()
-    sempler = TomekLinks(sampling_strategy='auto', n_jobs=-1)
-    data, target = sempler.fit_resample(data, target)
-    return data, target
+
 
 
 def main():
@@ -117,7 +110,7 @@ def main():
         pipe = sklearn.pipeline.Pipeline(steps=[
             ('preprocessor', preprocessor),
             ('sample_classifier_pipeline', imblearn.pipeline.Pipeline(steps=[
-                ('sampler', FunctionSampler(func=feature_sample)),
+                ('sampler', RandomUnderSampler(random_state=42)),
                 ('classifier', model)
             ]))
         ])
